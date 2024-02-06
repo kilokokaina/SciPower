@@ -97,12 +97,8 @@ public class DataController {
     }
 
     @FXML
-    protected void refresh() throws IOException {
+    protected void refresh() {
         getData();
-        documentTable.getScene().getWindow().hide();
-        controllerService.switchController(
-                "hello-view", applicationContext
-        );
     }
 
 }
