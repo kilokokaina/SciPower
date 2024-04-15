@@ -2,8 +2,6 @@ package com.mesi.scipower.service.impl;
 
 import com.mesi.scipower.model.ParseDocument;
 import com.mesi.scipower.service.ParserService;
-import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -52,6 +50,7 @@ public class CSVParserService implements ParserService {
         CSVFormat csvFormat = CSVFormat.Builder
                 .create(CSVFormat.RFC4180).setHeader(headerArray).build();
 
+        @SuppressWarnings("unchecked")
         var parseDocumentList = (List<ParseDocument>) applicationContext.getBean("parsedDocuments");
 
         try(CSVParser parser = new CSVParser(
@@ -77,21 +76,6 @@ public class CSVParserService implements ParserService {
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
-
-        Thread showAlert = new Thread(new Task<Void>() {
-            @Override
-            protected Void call() {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
-                alert.setTitle("Готов");
-                alert.setContentText("Данные загружены");
-                alert.showAndWait();
-
-                return null;
-            }
-        });
-        showAlert.setDaemon(true);
-        showAlert.start();
 
         log.info("Process completed: " + fileName);
     }
