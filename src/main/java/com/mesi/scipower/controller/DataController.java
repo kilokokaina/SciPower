@@ -88,12 +88,21 @@ public class DataController {
     @FXML
     protected void loadData(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
         List<File> selectedFile = fileChooser.showOpenMultipleDialog(stage);
         fileName.setText(String.format("Выбрано %d файлов", selectedFile.size()));
 
         for (File file : selectedFile) {
             executor.execute(() -> parserService.parseFile(file.getAbsolutePath()));
         }
+    }
+
+    @FXML
+    protected void goToWebView(ActionEvent event) throws IOException {
+        ((Node) event.getSource()).getScene().getWindow().hide();
+        controllerService.switchController(
+                "webview-controller", applicationContext
+        );
     }
 
     @FXML
