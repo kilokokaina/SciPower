@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/index.html
+/src/main/resources/keyword.txt
+/src/main/resources/model
+/src/main/resources/RIS prefix

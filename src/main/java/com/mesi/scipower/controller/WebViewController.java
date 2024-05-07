@@ -42,6 +42,7 @@ public class WebViewController {
     @FXML
     protected void refresh() {
         webView.getEngine().load(parseURL.getText());
+        parseURL.setText(webView.getEngine().getLocation());
     }
 
     @FXML

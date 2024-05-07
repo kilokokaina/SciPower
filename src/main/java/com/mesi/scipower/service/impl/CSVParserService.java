@@ -53,9 +53,7 @@ public class CSVParserService implements ParserService {
         @SuppressWarnings("unchecked")
         var parseDocumentList = (List<ParseDocument>) applicationContext.getBean("parsedDocuments");
 
-        try(CSVParser parser = new CSVParser(
-                new FileReader(fileName),
-                csvFormat)) {
+        try(CSVParser parser = new CSVParser(new FileReader(fileName), csvFormat)) {
 
             List<CSVRecord> csvData = parser.getRecords();
             csvData.forEach(csv -> {

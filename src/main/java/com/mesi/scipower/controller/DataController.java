@@ -31,15 +31,17 @@ public class DataController {
 
     private final SwitchControllerServiceImpl controllerService;
     private final ApplicationContext applicationContext;
-    private final ParserService parserService;
+    private final ParserService csvParserService;
+    private final ParserService risParserService;
     private final FileChooser fileChooser;
 
     @Autowired
-    public DataController(SwitchControllerServiceImpl controllerService, @Qualifier("CSV") ParserService parserService,
-                          ApplicationContext applicationContext) {
+    public DataController(SwitchControllerServiceImpl controllerService, ApplicationContext applicationContext,
+                          @Qualifier("CSV") ParserService csvParserService, @Qualifier("RIS") ParserService risParserService) {
         this.applicationContext = applicationContext;
         this.controllerService = controllerService;
-        this.parserService = parserService;
+        this.csvParserService = csvParserService;
+        this.risParserService = risParserService;
 
         fileChooser = new FileChooser();
 
@@ -93,7 +95,12 @@ public class DataController {
 
         CompletableFuture<Void> parserProcess = new CompletableFuture<>();
         for (File file : selectedFile) {
-            parserProcess = CompletableFuture.runAsync(() -> parserService.parseFile(file.getAbsolutePath()));
+            String fileExtension = file.getName().split("\\.")[1];
+
+            switch (fileExtension) {
+                case "csv" -> parserProcess = CompletableFuture.runAsync(() -> csvParserService.parseFile(file.getAbsolutePath()));
+                case "ris" -> parserProcess = CompletableFuture.runAsync(() -> risParserService.parseFile(file.getAbsolutePath()));
+            }
         }
         parserProcess.whenComplete((a, b) ->
             Platform.runLater(() -> {
