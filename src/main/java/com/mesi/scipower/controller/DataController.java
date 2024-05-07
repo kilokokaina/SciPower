@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +47,7 @@ public class DataController {
         fileChooser = new FileChooser();
 
         log.info("Application Context ID: " + this.applicationContext.getId());
-        log.info("load-data is loaded");
+        log.info("data-controller is loaded");
     }
 
     private final ObservableList<ParseDocument> documentData = FXCollections.observableArrayList();
@@ -69,6 +70,8 @@ public class DataController {
 
             documentTable.getColumns().add(column);
         }
+
+        getData();
 
         documentTable.setOnMouseClicked(mouseEvent -> {
             SelectionModel<ParseDocument> selectionModel = documentTable.getSelectionModel();
@@ -108,8 +111,8 @@ public class DataController {
 
                 alert.setTitle("Готово");
                 alert.setContentText("Загруженные файлы обработаны");
+                alert.initStyle(StageStyle.UTILITY);
                 alert.showAndWait();
-
                 getData();
             })
         );
@@ -121,11 +124,6 @@ public class DataController {
         controllerService.switchController(
                 "webview-controller", applicationContext
         );
-    }
-
-    @FXML
-    protected void refresh() {
-        getData();
     }
 
 }

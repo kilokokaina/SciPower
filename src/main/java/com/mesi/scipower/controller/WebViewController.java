@@ -108,7 +108,7 @@ public class WebViewController {
     protected void goBack(ActionEvent event) throws IOException {
         ((Node) event.getSource()).getScene().getWindow().hide();
         controllerService.switchController(
-                "load-data", applicationContext
+                "data-controller", applicationContext
         );
     }
 

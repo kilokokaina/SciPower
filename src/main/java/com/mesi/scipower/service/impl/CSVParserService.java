@@ -56,6 +56,7 @@ public class CSVParserService implements ParserService {
         try(CSVParser parser = new CSVParser(new FileReader(fileName), csvFormat)) {
 
             List<CSVRecord> csvData = parser.getRecords();
+            csvData.remove(0);
             csvData.forEach(csv -> {
                 ParseDocument document = new ParseDocument();
 

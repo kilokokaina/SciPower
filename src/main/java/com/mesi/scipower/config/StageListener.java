@@ -21,7 +21,7 @@ public class StageListener implements ApplicationListener<StageReadyEvent> {
     private final ApplicationContext applicationContext;
 
     public StageListener(@Value("${spring.application.ui.title}") String applicationTitle,
-                         @Value("classpath:/com.mesi.scipower/load-data.fxml") Resource resource,
+                         @Value("classpath:/com.mesi.scipower/data-controller.fxml") Resource resource,
                          ApplicationContext ac) {
         this.applicationTitle = applicationTitle;
         this.fxml = resource;
@@ -38,9 +38,13 @@ public class StageListener implements ApplicationListener<StageReadyEvent> {
             fxmlLoader.setControllerFactory(applicationContext::getBean);
 
             Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root, 640, 480);
+            Scene scene = new Scene(root, 1024, 720);
+
+//            stage.setMaximized(true);
+//            stage.setFullScreen(true);
             stage.setScene(scene);
             stage.setTitle(applicationTitle);
+
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
