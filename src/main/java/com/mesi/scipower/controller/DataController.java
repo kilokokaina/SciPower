@@ -40,6 +40,24 @@ public class DataController {
         this.risParserService = risParserService;
     }
 
+    private List<ParseDocument> getDTList(List<ParseDocument> dataList, int start, int length) {
+        List<ParseDocument> resultList;
+
+        if ((start + length) > dataList.size()) resultList = dataList.subList(start, dataList.size());
+        else resultList = dataList.subList(start, start + length);
+
+        return resultList;
+    }
+
+    private void writeToFile(List<String> refList, String filePath) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (String ref : refList) writer.write(ref + "\n");
+            writer.flush();
+        } catch (IOException exception) {
+            log.error(exception.getMessage());
+        }
+    }
+
     @GetMapping("data")
     public String dataPage(Model model) {
         model.addAttribute("thead", Arrays.stream(ParseDocument.class.getDeclaredFields()).map(Field::getName).toList());
@@ -94,19 +112,21 @@ public class DataController {
     @GetMapping("get-ref")
     public ResponseEntity<HttpStatus> getRef() {
         List<String> refList = dataList.stream().map(ParseDocument::getReferences).toList();
+        writeToFile(refList, "/Users/nikol/Desktop/ref.txt");
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/nikol/Desktop/ref.txt"))) {
-            for (String ref : refList) writer.write(ref + "\n");
-            writer.flush();
-        } catch (IOException exception) {
-            log.error(exception.getMessage());
-        }
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
+    @GetMapping("get-kw")
+    public ResponseEntity<HttpStatus> getKW() {
+        List<String> kwList = dataList.stream().map(ParseDocument::getAuthorKeywords).toList();
+        writeToFile(kwList, "/Users/nikol/Desktop/kw.txt");
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @GetMapping("get_datatable")
-    public @ResponseBody DataTableDTO test(@RequestParam Map<String, String> params) {
+    public ResponseEntity<DataTableDTO> test(@RequestParam Map<String, String> params) {
         List<ParseDocument> resultList;
         DataTableDTO resultDto = new DataTableDTO();
 
@@ -130,16 +150,7 @@ public class DataController {
         resultDto.setRecordsTotal(dataList.size());
         resultDto.setDraw(draw);
 
-        return resultDto;
-    }
-
-    private List<ParseDocument> getDTList(List<ParseDocument> dataList, int start, int length) {
-        List<ParseDocument> resultList;
-
-        if ((start + length) > dataList.size()) resultList = dataList.subList(start, dataList.size());
-        else resultList = dataList.subList(start, start + length);
-
-        return resultList;
+        return ResponseEntity.ok(resultDto);
     }
 
 }

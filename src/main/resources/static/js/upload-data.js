@@ -4,7 +4,6 @@ let parseWindow;
 async function uploadData() {
     const files = document.querySelector('#papers-list').files;
     const filesList = document.querySelector('#files-list');
-    // const uploadButton = document.querySelector('#upload-button');
     const formData = new FormData();
 
     console.log(files);
@@ -19,9 +18,6 @@ async function uploadData() {
         method: 'POST',
         body: formData
     }).then(async response => {
-        // let result = await response.json();
-        // console.log(result);
-
         filesList.innerHTML = '';
         for (let i = 0; i < files.length; i++) {
             if (response.ok) {
