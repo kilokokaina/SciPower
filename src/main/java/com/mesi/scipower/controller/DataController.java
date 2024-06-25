@@ -49,9 +49,9 @@ public class DataController {
         return resultList;
     }
 
-    private void writeToFile(List<String> refList, String filePath) {
+    private void writeToFile(List<String> paramList, String filePath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (String ref : refList) writer.write(ref + "\n");
+            for (String param : paramList) writer.write(param + "\n");
             writer.flush();
         } catch (IOException exception) {
             log.error(exception.getMessage());
@@ -103,12 +103,6 @@ public class DataController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @GetMapping("clear")
-    public @ResponseBody boolean clearDataList() {
-        dataList.clear();
-        return true;
-    }
-
     @GetMapping("get-ref")
     public ResponseEntity<HttpStatus> getRef() {
         List<String> refList = dataList.stream().map(ParseDocument::getReferences).toList();
@@ -151,6 +145,12 @@ public class DataController {
         resultDto.setDraw(draw);
 
         return ResponseEntity.ok(resultDto);
+    }
+
+    @GetMapping("clear")
+    public @ResponseBody boolean clearDataList() {
+        dataList.clear();
+        return true;
     }
 
 }
