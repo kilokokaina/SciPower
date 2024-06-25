@@ -45,27 +45,32 @@ public class CSVParserService implements ParserService {
 
         try(CSVParser parser = new CSVParser(new InputStreamReader(file.getInputStream()), csvFormat)) {
             List<CSVRecord> csvData = parser.getRecords();
+            Field[] fields; String[] values;
+
             csvData.remove(0);
-            csvData.forEach(csv -> {
+            for (CSVRecord csv: csvData) {
                 ParseDocument document = new ParseDocument();
 
-                Field[] fields = document.getClass().getDeclaredFields();
-                String[] values = csv.values();
+                fields = document.getClass().getDeclaredFields();
+                values = csv.values();
 
                 for (int i = 0; i < fields.length; i++) {
                     fields[i].setAccessible(true);
-                    try { fields[i].set(document, values[i]); }
-                    catch (IllegalAccessException e) { throw new RuntimeException(e); }
+                    try {
+                        fields[i].set(document, values[i]);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
                 parseDocumentList.add(document);
-            });
+            }
 
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
 
-        log.info("Process completed: " + file.getOriginalFilename());
+        log.info("Process completed: " + file.getOriginalFilename() + "; Rows: " + parseDocumentList.size());
 
         return CompletableFuture.completedFuture(parseDocumentList);
     }

@@ -148,7 +148,7 @@
 
                     <!-- Standard modal -->
                     <div id="upload-files-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="standard-modalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-dialog-scrollable" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h4 class="modal-title" id="standard-modalLabel">Загрузка списка публикаций</h4>
@@ -206,7 +206,7 @@
                                     <i class="mdi mdi-plus-circle me-2"></i>Загрузить список публикаций
                                 </button>
                             </div>
-                            <table id="data-list" class="table w-100">
+                            <table id="data-list" class="table w-100 h-100">
                                 <thead>
                                     <tr>
                                         <th th:each="field : ${thead}" th:text="${field}" />
@@ -263,9 +263,10 @@
 
         <script th:src="@{/js/upload-data.js}"></script>
         <script>
-            fetch('upload-data', { method: 'GET' }).then(async response => {
-                renderTable(await response.json());
-            });
+            renderTable();
+            // fetch('get-data', { method: 'GET' }).then(async response => {
+            //     renderTable(await response.json());
+            // });
         </script>
     </body>
 </html>

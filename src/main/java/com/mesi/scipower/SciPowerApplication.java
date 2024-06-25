@@ -32,7 +32,7 @@ public class SciPowerApplication {
 
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(10);
+        executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("parser-");
         executor.initialize();
 

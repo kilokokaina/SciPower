@@ -1,26 +1,25 @@
 package com.mesi.scipower.controller;
 
+import com.mesi.scipower.dto.DataTableDTO;
 import com.mesi.scipower.model.ParseDocument;
 import com.mesi.scipower.service.ParserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -49,17 +48,20 @@ public class DataController {
         return "data-page";
     }
 
-    @GetMapping("upload-data")
+    @GetMapping("get-data")
     public ResponseEntity<List<ParseDocument>> getUploadedData() {
         return ResponseEntity.ok(dataList);
     }
 
     @PostMapping("upload-data")
-    public ResponseEntity<List<ParseDocument>> uploadData(@RequestBody MultipartFile[] files) throws ExecutionException, InterruptedException {
+    public ResponseEntity<HttpStatus> uploadData(@RequestBody MultipartFile[] files) throws ExecutionException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+        String[] fileParams; String fileExtension;
+
         List<CompletableFuture<List<ParseDocument>>> futureList = new ArrayList<>();
         for (MultipartFile file : files) {
-            String[] fileParams = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-            String fileExtension = fileParams[fileParams.length - 1];
+            fileParams = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+            fileExtension = fileParams[fileParams.length - 1];
 
             switch (fileExtension) {
                 case "csv" -> {
@@ -74,12 +76,13 @@ public class DataController {
 
         }
 
-        CompletableFuture[] futureArray = new CompletableFuture[futureList.size()];
-        CompletableFuture.allOf(futureList.toArray(futureArray)).join();
-
+        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
         for (var future : futureList) dataList.addAll(future.get());
 
-        return ResponseEntity.ok(dataList);
+        long endTime = System.currentTimeMillis();
+        log.info("Process time: " + (endTime - startTime) + " ms");
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @GetMapping("clear")
@@ -89,17 +92,54 @@ public class DataController {
     }
 
     @GetMapping("get-ref")
-    public ResponseEntity<List<String>> getRef() {
+    public ResponseEntity<HttpStatus> getRef() {
         List<String> refList = dataList.stream().map(ParseDocument::getReferences).toList();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/ref.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/nikol/Desktop/ref.txt"))) {
             for (String ref : refList) writer.write(ref + "\n");
             writer.flush();
         } catch (IOException exception) {
             log.error(exception.getMessage());
         }
 
-        return ResponseEntity.ok(refList);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
+    @GetMapping("get_datatable")
+    public @ResponseBody DataTableDTO test(@RequestParam Map<String, String> params) {
+        List<ParseDocument> resultList;
+        DataTableDTO resultDto = new DataTableDTO();
+
+        int draw = Integer.parseInt(params.get("draw"));
+        int start = Integer.parseInt(params.get("start"));
+        int length = Integer.parseInt(params.get("length"));
+        String search = params.get("search[value]");
+
+        if (!search.isEmpty()) {
+            List<ParseDocument> filteredList = dataList.parallelStream().filter(
+                    doc -> doc.toString().substring(14, doc.toString().length() - 1).contains(search)).toList();
+            resultList = getDTList(filteredList, start, length);
+            resultDto.setRecordsFiltered(filteredList.size());
+        }
+        else {
+            resultList = getDTList(dataList, start, length);
+            resultDto.setRecordsFiltered(dataList.size());
+        }
+
+        resultDto.setData(resultList.toArray(new ParseDocument[0]));
+        resultDto.setRecordsTotal(dataList.size());
+        resultDto.setDraw(draw);
+
+        return resultDto;
+    }
+
+    private List<ParseDocument> getDTList(List<ParseDocument> dataList, int start, int length) {
+        List<ParseDocument> resultList;
+
+        if ((start + length) > dataList.size()) resultList = dataList.subList(start, dataList.size());
+        else resultList = dataList.subList(start, start + length);
+
+        return resultList;
     }
 
 }

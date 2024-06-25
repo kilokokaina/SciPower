@@ -24,8 +24,8 @@ public class MainController {
     @GetMapping
     @SuppressWarnings("unchecked")
     public String home(HttpSession session) {
-        log.info(String.valueOf(((List<ParseDocument>) context.getBean("dataList")).size()));
-        log.info(session.getId());
+        log.info("Rows: " + ((List<ParseDocument>) context.getBean("dataList")).size());
+        log.info("JSESSIONID=" + session.getId());
         return "home";
     }
 

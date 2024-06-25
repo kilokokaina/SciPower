@@ -2,9 +2,11 @@ package com.mesi.scipower.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
+@ToString(includeFieldNames = false)
 public class ParseDocument {
 
     private String authors;

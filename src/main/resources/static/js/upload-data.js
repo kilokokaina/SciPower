@@ -4,7 +4,7 @@ let parseWindow;
 async function uploadData() {
     const files = document.querySelector('#papers-list').files;
     const filesList = document.querySelector('#files-list');
-    const uploadButton = document.querySelector('#upload-button');
+    // const uploadButton = document.querySelector('#upload-button');
     const formData = new FormData();
 
     console.log(files);
@@ -13,13 +13,14 @@ async function uploadData() {
         formData.append('files', files[i]);
     }
 
-    console.log(formData.get('files'));
+    let startFetchTime = Date.now();
+
     fetch('upload-data', {
         method: 'POST',
         body: formData
     }).then(async response => {
-        let result = await response.json();
-        console.log(result);
+        // let result = await response.json();
+        // console.log(result);
 
         filesList.innerHTML = '';
         for (let i = 0; i < files.length; i++) {
@@ -30,8 +31,10 @@ async function uploadData() {
             }
         }
 
-        renderTable(result);
+        let endFetchTime = Date.now();
+        console.log('Fetch: ' + (endFetchTime - startFetchTime) + ' ms')
 
+        renderTable();
     });
 
     filesList.innerHTML = '';
@@ -51,9 +54,14 @@ function updateList() {
     }
 }
 
-function renderTable(data) {
+function renderTable() {
+    let startRenderTime = Date.now();
+
     new DataTable('#data-list', {
         destroy: true,
+        ajax: 'get_datatable',
+        processing: true,
+        serverSide: true,
         columns: [
             {data: "authors"},
             {data: "authorFullNames"},
@@ -103,9 +111,11 @@ function renderTable(data) {
             {data: "eid"}
         ],
         responsive: true,
-        scrollX: true,
-        data: data
+        ordering: false
     });
+
+    let endRenderTime = Date.now();
+    console.log('Render: ' + (endRenderTime - startRenderTime) + ' ms')
 }
 
 function siteParser() {
