@@ -244,7 +244,7 @@
         <!-- Input Mask Plugin js -->
         <script th:src="@{/vendor/jquery-mask-plugin/jquery.mask.min.js}"></script>
 
-        <script th:src="@{/js/upload-data.js}"></script>
+        <script th:src="@{/js/api/upload-data.js}"></script>
         <script>
             fetch('upload-data', {method: 'GET'}).then(async response => {
                 renderTable(await response.json());

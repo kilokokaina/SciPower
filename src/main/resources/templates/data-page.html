@@ -157,7 +157,7 @@
                                 <div class="modal-body">
                                     <div class="col-sm-6">
                                         <label for="papers-list" class="form-label">Выбирете файлы</label>
-                                        <input class="form-control" type="file" accept=".csv, .ris" id="papers-list" oninput="updateList()" multiple>
+                                        <input class="form-control" type="file"  id="papers-list" oninput="updateList()" multiple>
                                     </div>
                                     <div id="files-list">
 
@@ -166,22 +166,6 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
                                     <button type="button" id="upload-button" class="btn btn-primary" onclick="uploadData()" >Загрузить</button>
-                                </div>
-                            </div><!-- /.modal-content -->
-                        </div><!-- /.modal-dialog -->
-                    </div><!-- /.modal -->
-
-                    <!-- Success Alert Modal -->
-                    <div id="success-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-                        <div class="modal-dialog modal-sm">
-                            <div class="modal-content modal-filled bg-success">
-                                <div class="modal-body p-4">
-                                    <div class="text-center">
-                                        <i class="ri-check-line h1"></i>
-                                        <h4 class="mt-2">Список публикаций загружен!</h4>
-                                        <p class="mt-3"></p>
-                                        <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal" onclick="location.reload()">Продолжить</button>
-                                    </div>
                                 </div>
                             </div><!-- /.modal-content -->
                         </div><!-- /.modal-dialog -->
@@ -261,7 +245,7 @@
         <!-- Input Mask Plugin js -->
         <script th:src="@{/vendor/jquery-mask-plugin/jquery.mask.min.js}"></script>
 
-        <script th:src="@{/js/upload-data.js}"></script>
+        <script th:src="@{/js/api/upload-data.js}"></script>
         <script>
             renderTable();
             // fetch('get-data', { method: 'GET' }).then(async response => {

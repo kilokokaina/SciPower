@@ -23,7 +23,7 @@ public class ParserController {
     }
 
     @GetMapping("get-page-content")
-    public @ResponseBody String getHTML(@RequestParam String paperId) throws URISyntaxException, IOException, InterruptedException {
+    public @ResponseBody String getHTML(@RequestParam(value = "paper_id") String paperId) throws URISyntaxException, IOException, InterruptedException {
         HttpClient client = HttpClient.newBuilder().build();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(String.format("https://elibrary.ru/item.asp?id=%s", paperId)))

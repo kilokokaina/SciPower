@@ -1,4 +1,4 @@
-package com.mesi.scipower.service.impl;
+package com.mesi.scipower.service.impl.parser;
 
 import com.mesi.scipower.model.ParseDocument;
 import com.mesi.scipower.service.ParserService;

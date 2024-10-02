@@ -1,43 +1,37 @@
-// let dataTable;
-let parseWindow;
-
-async function uploadData() {
+function uploadData() {
     const files = document.querySelector('#papers-list').files;
     const filesList = document.querySelector('#files-list');
-    const formData = new FormData();
+    let formData;
+    let counter = 0;
 
     console.log(files);
     console.log(files.length);
     for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
-    }
+        formData = new FormData();
+        formData.append('file', files[i]);
 
-    let startFetchTime = Date.now();
-
-    fetch('upload-data', {
-        method: 'POST',
-        body: formData
-    }).then(async response => {
-        filesList.innerHTML = '';
-        for (let i = 0; i < files.length; i++) {
-            if (response.ok) {
-                filesList.innerHTML += `<h5 id="file-${i}"><span class="badge badge-outline-success">Обработано</span> ${files[i].name}</h5>`
+        fetch('upload_data', {
+            method: 'POST',
+            body: formData
+        }).then(async response => {
+            let uploadStatus = document.querySelector(`#file-${i}`);
+            if (response.status === 200) {
+                uploadStatus.innerHTML = `<h5 id="file-${i}"><span class="badge badge-outline-success">Обработано</span> ${files[i].name}</h5>`;
             } else {
-                filesList.innerHTML += `<h5 id="file-${i}"><span class="badge badge-outline-danger">Ошибка загрузки</span> ${files[i].name}</h5>`
+                uploadStatus.innerHTML = `<h5 id="file-${i}"><span class="badge badge-outline-danger">Ошибка загрузки</span> ${files[i].name}</h5>`;
             }
-        }
 
-        let endFetchTime = Date.now();
-        console.log('Fetch: ' + (endFetchTime - startFetchTime) + ' ms')
-
-        renderTable();
-    });
+            if (++counter === files.length) {
+                renderTable();
+                updateGraph();
+            }
+        });
+    }
 
     filesList.innerHTML = '';
     for (let i = 0; i < files.length; i++) {
         filesList.innerHTML += `<h5 id="file-${i}"><span class="spinner-border text-primary me-1" role="status" aria-hidden="true"></span> ${files[i].name}</h5>`
     }
-
 }
 
 function updateList() {
@@ -55,6 +49,9 @@ function renderTable() {
 
     new DataTable('#data-list', {
         destroy: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/2.0.8/i18n/ru.json'
+        },
         ajax: 'get_datatable',
         processing: true,
         serverSide: true,
@@ -111,16 +108,19 @@ function renderTable() {
     });
 
     let endRenderTime = Date.now();
-    console.log('Render: ' + (endRenderTime - startRenderTime) + ' ms')
+    console.log('Render: ' + (endRenderTime - startRenderTime) + ' ms');
 }
 
-function siteParser() {
-    const windowFeatures = "width=1024,height=720,popup";
-    parseWindow = window.open("https://elibrary.ru", "mozillaWindow", windowFeatures);
-}
+function updateGraph() {
+    fetch("/update_edges", { method: "GET" }).then(async response => {
+        if (response.status === 200) {
+            console.log('Edges: OK');
 
-function extractData() {
-    fetch('https://elibrary.ru', { mode: 'no-cors' })
-        .then(async response => console.log(await response.headers));
+            fetch("/update_nodes", { method: "GET" }).then(async response => {
+                if (response.status === 200) {
+                    console.log('Nodes: OK');
+                }
+            });
+        }
+    });
 }
-

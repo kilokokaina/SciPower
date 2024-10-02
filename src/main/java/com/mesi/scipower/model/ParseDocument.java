@@ -4,10 +4,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
-public class ParseDocument {
+public class ParseDocument implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String authors;
     private String authorFullNames;

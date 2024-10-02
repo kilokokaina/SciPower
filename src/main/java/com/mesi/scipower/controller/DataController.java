@@ -2,8 +2,11 @@ package com.mesi.scipower.controller;
 
 import com.mesi.scipower.dto.DataTableDTO;
 import com.mesi.scipower.model.ParseDocument;
+import com.mesi.scipower.model.Reference;
+import com.mesi.scipower.model.graph.Edge;
+import com.mesi.scipower.model.graph.Node;
 import com.mesi.scipower.service.ParserService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.mesi.scipower.service.impl.DataListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,112 +18,91 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Controller
 public class DataController {
 
+    private final String[] HEADERS;
+
     private final List<ParseDocument> dataList;
+    private final Set<Reference> referenceList;
+
+    private final Set<Node> nodeList;
+    private final Set<Edge> edgeList;
+
     private final ParserService csvParserService;
     private final ParserService risParserService;
+
+    private final DataListService dataListService;
 
     @Autowired
     @SuppressWarnings("unchecked")
     public DataController(ApplicationContext context, @Qualifier("CSV") ParserService csvParserService,
-                          @Qualifier("RIS") ParserService risParserService) {
+                          @Qualifier("RIS") ParserService risParserService, DataListService dataListService) {
+        this.HEADERS = ((List<String>) context.getBean("HEADERS")).toArray(new String[0]);
+
         this.dataList = (List<ParseDocument>) context.getBean("dataList");
+        this.referenceList = (Set<Reference>) context.getBean("referenceList");
+
+        this.nodeList = (Set<Node>) context.getBean("nodeList");
+        this.edgeList = (Set<Edge>) context.getBean("edgeList");
+
         this.csvParserService = csvParserService;
         this.risParserService = risParserService;
+
+        this.dataListService = dataListService;
     }
 
-    private List<ParseDocument> getDTList(List<ParseDocument> dataList, int start, int length) {
-        List<ParseDocument> resultList;
-
-        if ((start + length) > dataList.size()) resultList = dataList.subList(start, dataList.size());
-        else resultList = dataList.subList(start, start + length);
-
-        return resultList;
-    }
-
-    private void writeToFile(List<String> paramList, String filePath) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (String param : paramList) writer.write(param + "\n");
-            writer.flush();
-        } catch (IOException exception) {
-            log.error(exception.getMessage());
-        }
+    private static List<ParseDocument> getDTList(List<ParseDocument> dataList, int start, int length) {
+        return dataList.subList(start, Math.min((start + length), dataList.size()));
     }
 
     @GetMapping("data")
     public String dataPage(Model model) {
-        model.addAttribute("thead", Arrays.stream(ParseDocument.class.getDeclaredFields()).map(Field::getName).toList());
+        model.addAttribute("thead", HEADERS);
         model.addAttribute("data", dataList);
 
         return "data-page";
     }
 
-    @GetMapping("get-data")
-    public ResponseEntity<List<ParseDocument>> getUploadedData() {
+    @GetMapping("get_data")
+    public @ResponseBody ResponseEntity<List<ParseDocument>> getUploadedData() {
         return ResponseEntity.ok(dataList);
     }
 
-    @PostMapping("upload-data")
-    public ResponseEntity<HttpStatus> uploadData(@RequestBody MultipartFile[] files) throws ExecutionException, InterruptedException {
-        long startTime = System.currentTimeMillis();
-        String[] fileParams; String fileExtension;
+    @PostMapping("upload_data")
+    public @ResponseBody ResponseEntity<HttpStatus> uploadDataAsync(@RequestBody MultipartFile file) throws ExecutionException, InterruptedException {
+        String[] fileParams;String fileExtension;
+        List<ParseDocument> parserFuture;
 
-        List<CompletableFuture<List<ParseDocument>>> futureList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            fileParams = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-            fileExtension = fileParams[fileParams.length - 1];
+        fileParams = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+        fileExtension = fileParams[fileParams.length - 1];
 
-            switch (fileExtension) {
-                case "csv" -> {
-                    CompletableFuture<List<ParseDocument>> parserFuture = csvParserService.parseFile(file);
-                    futureList.add(parserFuture);
-                }
-                case "ris" -> {
-                    CompletableFuture<List<ParseDocument>> parserFuture = risParserService.parseFile(file);
-                    futureList.add(parserFuture);
-                }
+        switch (fileExtension) {
+            case "csv" -> {
+                parserFuture = csvParserService.parseFile(file).get();
+                dataList.addAll(parserFuture);
             }
-
+            case "ris" -> {
+                parserFuture = risParserService.parseFile(file).get();
+                dataList.addAll(parserFuture);
+            }
+            default -> {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         }
-
-        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
-        for (var future : futureList) dataList.addAll(future.get());
-
-        long endTime = System.currentTimeMillis();
-        log.info("Process time: " + (endTime - startTime) + " ms");
-
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @GetMapping("get-ref")
-    public ResponseEntity<HttpStatus> getRef() {
-        List<String> refList = dataList.stream().map(ParseDocument::getReferences).toList();
-        writeToFile(refList, "/Users/nikol/Desktop/ref.txt");
-
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @GetMapping("get-kw")
-    public ResponseEntity<HttpStatus> getKW() {
-        List<String> kwList = dataList.stream().map(ParseDocument::getAuthorKeywords).toList();
-        writeToFile(kwList, "/Users/nikol/Desktop/kw.txt");
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @GetMapping("get_datatable")
-    public ResponseEntity<DataTableDTO> test(@RequestParam Map<String, String> params) {
+    public @ResponseBody ResponseEntity<DataTableDTO> test(@RequestParam Map<String, String> params) {
         List<ParseDocument> resultList;
         DataTableDTO resultDto = new DataTableDTO();
 
@@ -147,9 +129,48 @@ public class DataController {
         return ResponseEntity.ok(resultDto);
     }
 
+    @GetMapping("get_nodes")
+    public @ResponseBody ResponseEntity<Set<Node>> getNodes() {
+        return ResponseEntity.ok(nodeList);
+    }
+
+    @GetMapping("update_nodes")
+    public @ResponseBody ResponseEntity<HttpStatus> updateNodes() {
+        if (!dataListService.updateNodes()) return new ResponseEntity<>(HttpStatus.OK);
+        else return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("get_edges")
+    public @ResponseBody ResponseEntity<Set<Edge>> getEdges() {
+        return ResponseEntity.ok(edgeList);
+    }
+
+    @GetMapping("update_edges")
+    public @ResponseBody ResponseEntity<HttpStatus> updateEdges() {
+        if (!dataListService.getReference()) return new ResponseEntity<>(HttpStatus.OK);
+        else return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("get_ref")
+    public @ResponseBody ResponseEntity<Set<Reference>> getRef() {
+        return ResponseEntity.ok(referenceList);
+    }
+
+    @GetMapping("get_kw")
+    public @ResponseBody ResponseEntity<Set<String>> getKW() {
+        Set<String> result = dataListService.getKeyWordList();
+        log.info("Key words: " + result.size());
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("clear")
     public @ResponseBody boolean clearDataList() {
         dataList.clear();
+        referenceList.clear();
+        nodeList.clear();
+        edgeList.clear();
+
         return true;
     }
 
