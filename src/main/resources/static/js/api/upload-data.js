@@ -10,7 +10,7 @@ function uploadData() {
         formData = new FormData();
         formData.append('file', files[i]);
 
-        fetch('upload_data', {
+        fetch('api/data/upload', {
             method: 'POST',
             body: formData
         }).then(async response => {
@@ -23,7 +23,8 @@ function uploadData() {
 
             if (++counter === files.length) {
                 renderTable();
-                updateGraph();
+                await findReferences();
+                await updateGraph();
             }
         });
     }
@@ -52,7 +53,7 @@ function renderTable() {
         language: {
             url: '//cdn.datatables.net/plug-ins/2.0.8/i18n/ru.json'
         },
-        ajax: 'get_datatable',
+        ajax: 'api/data/get/datatable',
         processing: true,
         serverSide: true,
         columns: [
@@ -111,16 +112,24 @@ function renderTable() {
     console.log('Render: ' + (endRenderTime - startRenderTime) + ' ms');
 }
 
-function updateGraph() {
-    fetch("/update_edges", { method: "GET" }).then(async response => {
-        if (response.status === 200) {
-            console.log('Edges: OK');
+async function findReferences() {
+    await fetch("api/data/update/ref", { method: "GET" });
+}
 
-            fetch("/update_nodes", { method: "GET" }).then(async response => {
-                if (response.status === 200) {
-                    console.log('Nodes: OK');
-                }
-            });
-        }
-    });
+
+async function updateGraph() {
+    await updateNodes();
+    await updateEdges();
+}
+
+async function updateNodes() {
+    const response = await fetch("api/node/update", { method: "GET" });
+    const status = response.status;
+    if (status === 200) console.log('Nodes: OK');
+}
+
+async function updateEdges() {
+    const response = await fetch("api/edge/update", { method: "GET" });
+    const status = response.status;
+    if (status === 200) console.log('Edges: OK');
 }

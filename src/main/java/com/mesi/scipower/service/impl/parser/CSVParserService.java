@@ -38,15 +38,15 @@ public class CSVParserService implements ParserService {
     public CompletableFuture<List<ParseDocument>> parseFile(MultipartFile file) {
         log.info(String.format("CSVParser process %s file...", file.getOriginalFilename()));
 
-        List<ParseDocument> parseDocumentList = new ArrayList<>();
-        CSVFormat csvFormat = CSVFormat.Builder.create(CSVFormat.RFC4180).setSkipHeaderRecord(true).setHeader(HEADERS).build();
+        var parseDocumentList = new ArrayList<ParseDocument>();
+        var csvFormat = CSVFormat.Builder.create(CSVFormat.RFC4180).setSkipHeaderRecord(true).setHeader(HEADERS).build();
 
-        try(CSVParser parser = new CSVParser(new InputStreamReader(file.getInputStream()), csvFormat)) {
-            List<CSVRecord> csvData = parser.getRecords();
+        try(var parser = new CSVParser(new InputStreamReader(file.getInputStream()), csvFormat)) {
+            var csvData = parser.getRecords();
             Field[] fields; String[] values;
 
             for (CSVRecord csv: csvData) {
-                ParseDocument document = new ParseDocument();
+                var document = new ParseDocument();
 
                 fields = document.getClass().getDeclaredFields();
                 values = csv.values();

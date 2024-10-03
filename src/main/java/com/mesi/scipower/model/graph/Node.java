@@ -14,4 +14,8 @@ public class Node {
     private int y;
     private int size;
 
+    public Node(String label) {
+        this.label = label;
+    }
+
 }

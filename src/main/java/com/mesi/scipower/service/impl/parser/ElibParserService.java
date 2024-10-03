@@ -21,11 +21,11 @@ public class ElibParserService implements ParserService {
 
     public void getElibRef(String elibHTML) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/elib.txt"))) {
-            Document elibDoc = Jsoup.parse(elibHTML);
+            var elibDoc = Jsoup.parse(elibHTML);
 
             String pageNum;
             try {
-                Elements links = elibDoc.select("table[bgcolor='#ffffff']")
+                var links = elibDoc.select("table[bgcolor='#ffffff']")
                         .get(2).select("a[href*='query_results.asp?pagenum=']");
                 pageNum = links.get(links.size() - 1).attr("href").split("\\?")[1];
                 pageNum = pageNum.split("=")[1];
@@ -38,14 +38,14 @@ public class ElibParserService implements ParserService {
             log.info("Count of pages: " + pageNum);
             writer.write("Count of pages: " + pageNum + "\n");
 
-            Elements papers = elibDoc.select("table[bgcolor='#ffffff']")
+            var papers = elibDoc.select("table[bgcolor='#ffffff']")
                     .get(1).select("tr[bgcolor='#f5f5f5']");
             int paperCount = papers.size();
 
             log.info("Count of papers on one page: " + paperCount);
             writer.write("Count of papers on one page: " + paperCount + "\n");
             papers.forEach(paper -> {
-                Elements paperInfo = paper.getElementsByTag("td");
+                var paperInfo = paper.getElementsByTag("td");
 
                 String paperId = paperInfo.get(0).text();
                 String paperLink = paperInfo.get(1).getElementsByTag("a").get(0).attr("href");

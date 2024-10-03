@@ -24,8 +24,8 @@ public class ParserController {
 
     @GetMapping("get-page-content")
     public @ResponseBody String getHTML(@RequestParam(value = "paper_id") String paperId) throws URISyntaxException, IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpRequest request = HttpRequest.newBuilder()
+        var client = HttpClient.newBuilder().build();
+        var request = HttpRequest.newBuilder()
                 .uri(new URI(String.format("https://elibrary.ru/item.asp?id=%s", paperId)))
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
                 .header("Accept-Encoding", "gzip, deflate, br")

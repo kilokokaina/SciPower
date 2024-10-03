@@ -24,11 +24,11 @@ public class RISParserService implements ParserService {
     @Async
     @Override
     public CompletableFuture<List<ParseDocument>> parseFile(MultipartFile file) {
-        List<ParseDocument> parseDocumentList = new ArrayList<>();
+        var parseDocumentList = new ArrayList<ParseDocument>();
         log.info(String.format("RISParser process %s file...", file.getOriginalFilename()));
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            ParseDocument document = new ParseDocument();
+        try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            var document = new ParseDocument();
 
             String line;
             while((line = reader.readLine()) != null) {

@@ -54,7 +54,7 @@ public class SciPowerApplication {
     @Bean
     @ApplicationScope
     public List<String> HEADERS() {
-        List<String> result = new ArrayList<>();
+        var result = new ArrayList<String>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/model"))) {
             String line;
@@ -70,7 +70,7 @@ public class SciPowerApplication {
 
     @Bean
     public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        var executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
