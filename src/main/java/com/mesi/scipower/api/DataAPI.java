@@ -3,8 +3,8 @@ package com.mesi.scipower.api;
 import com.mesi.scipower.dto.DataTableDTO;
 import com.mesi.scipower.model.ParseDocument;
 import com.mesi.scipower.model.Reference;
-import com.mesi.scipower.service.ParserService;
 import com.mesi.scipower.service.DataService;
+import com.mesi.scipower.service.ParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -40,7 +39,7 @@ public class DataAPI {
     public DataAPI(ApplicationContext context, @Qualifier("CSV") ParserService csvParserService,
                           @Qualifier("RIS") ParserService risParserService, DataService dataService) {
         this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
+        this.referenceList = (Set<Reference>) context.getBean("referenceList");
 
         this.csvParserService = csvParserService;
         this.risParserService = risParserService;
@@ -59,21 +58,14 @@ public class DataAPI {
 
     @PostMapping("upload")
     public @ResponseBody ResponseEntity<HttpStatus> uploadDataAsync(@RequestBody MultipartFile file) throws ExecutionException, InterruptedException {
-        String[] fileParams;String fileExtension;
-        List<ParseDocument> parserFuture;
+        String[] fileParams; String fileExtension;
 
         fileParams = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
         fileExtension = fileParams[fileParams.length - 1];
 
         switch (fileExtension) {
-            case "csv" -> {
-                parserFuture = csvParserService.parseFile(file).get();
-                dataList.addAll(parserFuture);
-            }
-            case "ris" -> {
-                parserFuture = risParserService.parseFile(file).get();
-                dataList.addAll(parserFuture);
-            }
+            case "csv" -> dataList.addAll(csvParserService.parseFile(file).get());
+            case "ris" -> dataList.addAll(risParserService.parseFile(file).get());
             default -> {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 @RestController
 @RequestMapping("api/edge")
@@ -24,7 +23,7 @@ public class EdgeAPI {
     @Autowired
     @SuppressWarnings("unchecked")
     public EdgeAPI(ApplicationContext context, EdgeService edgeService) {
-        this.edgeList = (CopyOnWriteArraySet<Edge>) context.getBean("edgeList");
+        this.edgeList = (Set<Edge>) context.getBean("edgeList");
         this.edgeService = edgeService;
     }
 

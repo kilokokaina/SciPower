@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @Service
@@ -26,9 +25,9 @@ public class NodeService {
     @SuppressWarnings("unchecked")
     public NodeService(ApplicationContext context) {
         this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
+        this.referenceList = (Set<Reference>) context.getBean("referenceList");
 
-        this.nodeList = (CopyOnWriteArraySet<Node>) context.getBean("nodeList");
+        this.nodeList = (Set<Node>) context.getBean("nodeList");
     }
 
     public boolean setNodes() {

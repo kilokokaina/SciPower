@@ -25,7 +25,7 @@ public class DataService {
     @SuppressWarnings("unchecked")
     public DataService(ApplicationContext context) {
         this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
+        this.referenceList = (Set<Reference>) context.getBean("referenceList");
     }
 
     private ParseDocument findByTitle(String title) {
@@ -40,7 +40,8 @@ public class DataService {
     }
 
     public boolean findReferences() {
-        var documentTitles = dataList.stream().map(ParseDocument::getTitle).toList();
+        var documentTitles = dataList.stream().map(ParseDocument::getTitle)
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         long startTime = System.currentTimeMillis();
 
         dataList.parallelStream().forEach(document -> {

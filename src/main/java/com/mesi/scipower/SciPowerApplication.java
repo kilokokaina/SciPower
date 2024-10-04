@@ -16,9 +16,11 @@ import org.springframework.web.context.annotation.ApplicationScope;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @EnableAsync
@@ -37,20 +39,20 @@ public class SciPowerApplication {
 
     @Bean
     @ApplicationScope
-    public CopyOnWriteArraySet<Edge> edgeList() {
-        return new CopyOnWriteArraySet<>();
+    public Set<Edge> edgeList() {
+        return ConcurrentHashMap.newKeySet();
     }
 
     @Bean
     @ApplicationScope
-    public CopyOnWriteArraySet<Node> nodeList() {
-        return new CopyOnWriteArraySet<>();
+    public Set<Node> nodeList() {
+        return ConcurrentHashMap.newKeySet();
     }
 
     @Bean
     @ApplicationScope
-    public CopyOnWriteArraySet<Reference> referenceList() {
-        return new CopyOnWriteArraySet<>();
+    public Set<Reference> referenceList() {
+        return ConcurrentHashMap.newKeySet();
     }
 
     @Bean
@@ -74,7 +76,7 @@ public class SciPowerApplication {
     public TaskExecutor taskExecutor() {
         var executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(8);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("parser-");
