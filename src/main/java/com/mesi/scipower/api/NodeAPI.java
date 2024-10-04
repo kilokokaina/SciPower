@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @RestController
 @RequestMapping("api/node")
@@ -23,7 +24,7 @@ public class NodeAPI {
     @Autowired
     @SuppressWarnings("unchecked")
     public NodeAPI(ApplicationContext context, NodeService nodeService) {
-        this.nodeList = (Set<Node>) context.getBean("nodeList");
+        this.nodeList = (CopyOnWriteArraySet<Node>) context.getBean("nodeList");
         this.nodeService = nodeService;
     }
 
@@ -34,10 +35,7 @@ public class NodeAPI {
 
     @GetMapping("update")
     public @ResponseBody ResponseEntity<HttpStatus> updateNodes() {
-        if (!nodeService.setNodes()) {
-            nodeService.calculateNodesSize();
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
+        if (!nodeService.setNodes()) return new ResponseEntity<>(HttpStatus.OK);
         else return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

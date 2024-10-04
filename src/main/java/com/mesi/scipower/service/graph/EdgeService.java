@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @Service
@@ -19,8 +20,8 @@ public class EdgeService {
     @Autowired
     @SuppressWarnings("unchecked")
     public EdgeService(ApplicationContext context) {
-        this.referenceList = (Set<Reference>) context.getBean("referenceList");
-        this.edgeList = (Set<Edge>) context.getBean("edgeList");
+        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
+        this.edgeList = (CopyOnWriteArraySet<Edge>) context.getBean("edgeList");
     }
 
     public boolean calculateEdges() {
@@ -33,7 +34,7 @@ public class EdgeService {
 
         log.info("Edges: " + edgeList.size());
 
-        return !edgeList.isEmpty();
+        return edgeList.isEmpty();
     }
 
 }

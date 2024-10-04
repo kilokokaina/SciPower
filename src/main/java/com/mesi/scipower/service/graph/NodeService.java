@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @Service
@@ -23,22 +25,24 @@ public class NodeService {
     @Autowired
     @SuppressWarnings("unchecked")
     public NodeService(ApplicationContext context) {
-        this.dataList = (List<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (Set<Reference>) context.getBean("referenceList");
+        this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
+        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
 
-        this.nodeList = (Set<Node>) context.getBean("nodeList");
+        this.nodeList = (CopyOnWriteArraySet<Node>) context.getBean("nodeList");
     }
 
     public boolean setNodes() {
         long startTime = System.currentTimeMillis();
 
-        referenceList.forEach(reference -> {
+        referenceList.parallelStream().forEach(reference -> {
             var document = new Node(reference.getDocument().getTitle());
             var referenceDocument = new Node(reference.getReference().getTitle());
 
             nodeList.add(document);
             nodeList.add(referenceDocument);
         });
+
+        this.calculateNodesSize();
 
         long stopTime = System.currentTimeMillis();
 
@@ -51,7 +55,7 @@ public class NodeService {
     public void calculateNodesSize() {
         nodeList.parallelStream().forEach(node -> {
             int x = (int) (Math.random() * dataList.size());
-            int y = (int) (Math.random() * dataList.size());
+            int y = (int) (Math.random() * dataList.size()) / 2;
 
             node.setX(x);
             node.setY(y);

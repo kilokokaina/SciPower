@@ -113,7 +113,12 @@ function renderTable() {
 }
 
 async function findReferences() {
-    await fetch("api/data/update/ref", { method: "GET" });
+    const startTime = Date.now();
+
+    const response = await fetch("api/data/update/ref", { method: "GET" });
+    const status = response.status;
+
+    if (status === 200) console.log('References: OK. ' + (Date.now() - startTime) + ' ms');
 }
 
 
@@ -123,13 +128,19 @@ async function updateGraph() {
 }
 
 async function updateNodes() {
+    const startTime = Date.now();
+
     const response = await fetch("api/node/update", { method: "GET" });
     const status = response.status;
-    if (status === 200) console.log('Nodes: OK');
+
+    if (status === 200) console.log('Nodes: OK. ' + (Date.now() - startTime) + ' ms');
 }
 
 async function updateEdges() {
+    const startTime = Date.now();
+
     const response = await fetch("api/edge/update", { method: "GET" });
     const status = response.status;
-    if (status === 200) console.log('Edges: OK');
+
+    if (status === 200) console.log('Edges: OK. ' + (Date.now() - startTime) + ' ms');
 }

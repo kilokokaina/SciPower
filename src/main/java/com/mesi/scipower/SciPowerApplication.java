@@ -17,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @EnableAsync
@@ -29,26 +31,26 @@ public class SciPowerApplication {
 
     @Bean
     @ApplicationScope
-    public List<ParseDocument> dataList() {
-        return Collections.synchronizedList(new ArrayList<>());
+    public CopyOnWriteArrayList<ParseDocument> dataList() {
+        return new CopyOnWriteArrayList<>();
     }
 
     @Bean
     @ApplicationScope
-    public Set<Edge> edgeList() {
-        return Collections.synchronizedSet(new HashSet<>());
+    public CopyOnWriteArraySet<Edge> edgeList() {
+        return new CopyOnWriteArraySet<>();
     }
 
     @Bean
     @ApplicationScope
-    public Set<Node> nodeList() {
-        return Collections.synchronizedSet(new HashSet<>());
+    public CopyOnWriteArraySet<Node> nodeList() {
+        return new CopyOnWriteArraySet<>();
     }
 
     @Bean
     @ApplicationScope
-    public Set<Reference> referenceList() {
-        return Collections.synchronizedSet(new HashSet<>());
+    public CopyOnWriteArraySet<Reference> referenceList() {
+        return new CopyOnWriteArraySet<>();
     }
 
     @Bean

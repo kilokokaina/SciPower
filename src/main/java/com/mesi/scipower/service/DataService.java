@@ -7,11 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,13 +24,19 @@ public class DataService {
     @Autowired
     @SuppressWarnings("unchecked")
     public DataService(ApplicationContext context) {
-        this.dataList = (List<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (Set<Reference>) context.getBean("referenceList");
+        this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
+        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
     }
 
     private ParseDocument findByTitle(String title) {
-        var result = dataList.stream().filter(document -> document.getTitle().equals(title)).toList();
-        return !result.isEmpty() ? result.get(0) : null;
+        ParseDocument result = null;
+        for (var document : dataList) {
+            if (document.getTitle().equals(title)) {
+                result = document;
+            }
+        }
+
+        return result;
     }
 
     public boolean findReferences() {
@@ -70,8 +77,9 @@ public class DataService {
     }
 
     public Set<String> getKeyWordList() {
-        var documentKeyWords = dataList.stream().map(ParseDocument::getAuthorKeywords).toList();
-        var keyWordsSet = Collections.synchronizedSet(new HashSet<String>());
+        var documentKeyWords = dataList.stream().map(ParseDocument::getAuthorKeywords)
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+        var keyWordsSet = new CopyOnWriteArraySet<String>();
 
         long startTime = System.currentTimeMillis();
 

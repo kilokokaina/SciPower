@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -37,8 +39,8 @@ public class DataAPI {
     @SuppressWarnings("unchecked")
     public DataAPI(ApplicationContext context, @Qualifier("CSV") ParserService csvParserService,
                           @Qualifier("RIS") ParserService risParserService, DataService dataService) {
-        this.dataList = (List<ParseDocument>) context.getBean("dataList");
-        this.referenceList = (Set<Reference>) context.getBean("referenceList");
+        this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
+        this.referenceList = (CopyOnWriteArraySet<Reference>) context.getBean("referenceList");
 
         this.csvParserService = csvParserService;
         this.risParserService = risParserService;
