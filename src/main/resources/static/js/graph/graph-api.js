@@ -1,3 +1,5 @@
+const graph = new graphology.Graph();
+
 async function getNodes() {
     const response = await fetch("api/node/get", { method: "GET" });
     const result = await response.json();
@@ -20,13 +22,15 @@ async function getEdges() {
     }
 
     for (let i = 0; i < result.length; i++) {
-        graph.addEdge(result[i].document, result[i].reference, { size: 1, color: "purple", type: "arrow" });
+        try {
+            graph.addEdge(result[i].document, result[i].reference, {size: 1, color: "purple", type: "arrow"});
+        } catch (error) {
+            console.log(error.message);
+        }
     }
 }
 
 async function drawGraph() {
-    const graph = new graphology.Graph();
-
     await getNodes();
     await getEdges()
 
