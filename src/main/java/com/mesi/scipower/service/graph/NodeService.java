@@ -118,17 +118,17 @@ public class NodeService {
                 node.setX(maxWeightNode.getX() + delta[0]);
                 node.setY(maxWeightNode.getY() + delta[1]);
 
-                for (var reference : referenceList) {
-                    if (reference.getReference().getTitle().equals(node.getLabel())) {
-                        var documentNode = this.findByTitle(reference.getDocument().getTitle());
-                        if (documentNode != null && documentNode.getSize() < percentile) {
-                            var innerDelta = getDelta(documentNode, node);
-
-                            documentNode.setX(node.getX() + innerDelta[0]);
-                            documentNode.setY(node.getY() + innerDelta[1]);
-                        }
-                    }
-                }
+//                for (var reference : referenceList) {
+//                    if (reference.getReference().getTitle().equals(node.getLabel())) {
+//                        var documentNode = this.findByTitle(reference.getDocument().getTitle());
+//                        if (documentNode != null && documentNode.getSize() < percentile) {
+//                            var innerDelta = getDelta(documentNode, node);
+//
+//                            documentNode.setX(maxWeightNode.getX() + innerDelta[0]);
+//                            documentNode.setY(maxWeightNode.getY() + innerDelta[1]);
+//                        }
+//                    }
+//                }
             }
         }
     }

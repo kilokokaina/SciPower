@@ -14,6 +14,7 @@ public class Node {
     private int y;
     private int size;
     private int weight;
+    private String color = "#f13005";
 
     public Node(String label) {
         this.label = label;

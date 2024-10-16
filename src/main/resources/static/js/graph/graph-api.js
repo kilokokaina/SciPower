@@ -23,7 +23,7 @@ async function getEdges() {
 
     for (let i = 0; i < result.length; i++) {
         try {
-            graph.addEdge(result[i].document.label, result[i].reference.label, {size: 1, color: "purple", type: "arrow"});
+            graph.addEdge(result[i].document.label, result[i].reference.label, {size: 1, color: "#ffbd73", type: "arrow"});
         } catch (error) {
             console.log('Doc: ' + result[i].document.label + ' \nRef: ' + result[i].reference.label);
             console.log(error.message);
