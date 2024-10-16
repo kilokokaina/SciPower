@@ -7,8 +7,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class Edge {
 
-    private String document;
-    private String reference;
+    private Node document;
+    private Node reference;
+    private int weight;
     private int size;
 
 }

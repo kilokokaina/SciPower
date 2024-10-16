@@ -51,6 +51,8 @@ public class CSVParserService implements ParserService {
                 fields = document.getClass().getDeclaredFields();
                 values = csv.values();
 
+                if (values[3].isEmpty()) continue;
+
                 for (int i = 1; i < fields.length; i++) {
                     fields[i].setAccessible(true);
                     try {

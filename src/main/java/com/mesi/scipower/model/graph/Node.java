@@ -13,6 +13,7 @@ public class Node {
     private int x;
     private int y;
     private int size;
+    private int weight;
 
     public Node(String label) {
         this.label = label;
