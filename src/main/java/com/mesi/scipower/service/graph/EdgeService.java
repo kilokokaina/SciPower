@@ -2,7 +2,6 @@ package com.mesi.scipower.service.graph;
 
 import com.mesi.scipower.model.Reference;
 import com.mesi.scipower.model.graph.Edge;
-import com.mesi.scipower.model.graph.Node;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +45,8 @@ public class EdgeService {
         });
 
         log.info("Edges: " + edgeList.size());
+
+        nodeService.calculateNodePlacement();
 
         return edgeList.isEmpty();
     }

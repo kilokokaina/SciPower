@@ -2,6 +2,7 @@ package com.mesi.scipower.service.graph;
 
 import com.mesi.scipower.model.ParseDocument;
 import com.mesi.scipower.model.Reference;
+import com.mesi.scipower.model.graph.Edge;
 import com.mesi.scipower.model.graph.Node;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class NodeService {
     private final List<ParseDocument> dataList;
     private final Set<Reference> referenceList;
     private final Set<Node> nodeList;
+    private final Set<Edge> edgeList;
 
     @Autowired
     @SuppressWarnings("unchecked")
@@ -28,6 +30,7 @@ public class NodeService {
         this.dataList = (CopyOnWriteArrayList<ParseDocument>) context.getBean("dataList");
         this.referenceList = (Set<Reference>) context.getBean("referenceList");
         this.nodeList = (Set<Node>) context.getBean("nodeList");
+        this.edgeList = (Set<Edge>) context.getBean("edgeList");
     }
 
     public Node findByTitle(String title) {
@@ -40,8 +43,8 @@ public class NodeService {
 
         if (result == null) {
             result = new Node(title);
-            result.setX(dataList.size());
-            result.setY(dataList.size() / 2);
+            result.setX(dataList.size() / 2);
+            result.setY(dataList.size() / 4);
             result.setWeight(1);
             result.setSize(1);
         }
@@ -84,11 +87,9 @@ public class NodeService {
             node.setX(dataList.size() / 2);
             node.setY(dataList.size() / 4);
         });
-
-        this.calculateNodePlacement();
     }
 
-    private int[] getDelta(Node firstNode, Node secondNode) {
+    public int[] getDelta(Node firstNode, Node secondNode) {
         double alpha = Math.random() * (2 * Math.PI);
 
         int delta = firstNode.getWeight() * secondNode.getWeight();
@@ -99,38 +100,52 @@ public class NodeService {
         return new int[] { x, y };
     }
 
-    private void calculateNodePlacement() {
+    public void calculateNodePlacement() {
         var nodeSizeSet = nodeList.stream().map(Node::getWeight).collect(Collectors.toSet());
         log.info("Length: " + nodeSizeSet.size());
         log.info("Sizes: " + nodeSizeSet);
 
         int percentile = nodeSizeSet.toArray(new Integer[0])[(int) (nodeSizeSet.size() * 0.75)];
+        var percentileSet = nodeList.stream().filter(node -> node.getWeight() >= percentile).collect(Collectors.toSet());
         log.info("Percentile: " + percentile);
 
         var maxWeightNode = nodeList.stream().max(Comparator.comparing(Node::getWeight)).orElse(null);
         assert maxWeightNode != null;
         log.info("Node with max weight: " + maxWeightNode);
 
-        for (Node node : nodeList) {
-            if (node.getWeight() < maxWeightNode.getWeight()) {
-                var delta = getDelta(node, maxWeightNode);
+        percentileSet.parallelStream().forEach(node -> {
+            if (!node.equals(maxWeightNode)) {
+                var delta = getDelta(maxWeightNode, node);
 
                 node.setX(maxWeightNode.getX() + delta[0]);
                 node.setY(maxWeightNode.getY() + delta[1]);
-
-//                for (var reference : referenceList) {
-//                    if (reference.getReference().getTitle().equals(node.getLabel())) {
-//                        var documentNode = this.findByTitle(reference.getDocument().getTitle());
-//                        if (documentNode != null && documentNode.getSize() < percentile) {
-//                            var innerDelta = getDelta(documentNode, node);
-//
-//                            documentNode.setX(maxWeightNode.getX() + innerDelta[0]);
-//                            documentNode.setY(maxWeightNode.getY() + innerDelta[1]);
-//                        }
-//                    }
-//                }
             }
-        }
-    }
 
+            edgeList.parallelStream().filter(edge -> edge.getReference().equals(node))
+                .forEach(edge -> {
+                    var documentNode = edge.getDocument();
+                    if (documentNode.getSize() < percentile) {
+                        var innerDelta = getDelta(node, documentNode);
+
+                        documentNode.setX(node.getX() + innerDelta[0]);
+                        documentNode.setY(node.getY() + innerDelta[1]);
+                    }
+                }
+            );
+        });
+
+        nodeList.parallelStream().filter(node -> (node.getX() == dataList.size() / 2 && node.getY() == dataList.size() / 4))
+            .forEach(node -> edgeList.parallelStream().filter(edge -> edge.getDocument().equals(node))
+                .forEach(edge -> {
+                    var reference = edge.getReference();
+                    if (reference.getX() != dataList.size() / 2 && reference.getY() != dataList.size() / 4) {
+                        var delta = getDelta(node, reference);
+
+                        node.setX(reference.getX() + delta[0]);
+                        node.setY(reference.getY() + delta[1]);
+                    }
+                }
+            )
+        );
+    }
 }
